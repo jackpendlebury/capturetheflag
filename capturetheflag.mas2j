@@ -1,0 +1,16 @@
+MAS capturetheflag {
+	infrastructure: Centralised
+
+	environment: MapEnv(gui)
+
+	agents:
+	
+//		orgManager [osfile="ctf-os.xml",gui=yes]
+//			agentArchClass jmoise.OrgManager;
+		player;
+
+	aslSourcePath:
+		"src/asl";
+		
+	//TODO: MAIN - Fix Agent stopping on flag
+}
