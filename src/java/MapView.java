@@ -1,5 +1,3 @@
-
-
 import jason.environment.grid.*;
 
 import java.awt.Color;
@@ -40,7 +38,7 @@ public class MapView extends GridWorldView {
                 }
                 break;
             case MapModel.FLAG:
-            	if(!viewModel.carryingFlag){
+            	if(!viewModel.flag.flagCarried){
             		super.drawAgent(g, x, y, Color.green, -1);
             		g.setColor(Color.black);
                 	super.drawString(g, x, y, defaultFont, "Flag");
@@ -50,7 +48,7 @@ public class MapView extends GridWorldView {
     }
 		
 	public void drawAgent(Graphics g, int x, int y, Color c, int id) {
-        if (viewModel.carryingFlag){
+        if (viewModel.flag.flagCarried){
         	c = Color.magenta;
 	    	super.drawAgent(g, x, y, c, id);
 	    	g.setColor(Color.black);
@@ -59,7 +57,6 @@ public class MapView extends GridWorldView {
         	c = Color.red;
         	super.drawAgent(g, x, y, c, id);
         	g.setColor(Color.black);
-            super.drawString(g, x, y, defaultFont, "Player");
         }
     }
 	
