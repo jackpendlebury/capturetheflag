@@ -48,7 +48,7 @@ public class MapView extends GridWorldView {
     }
 		
 	public void drawAgent(Graphics g, int x, int y, Color c, int id) {
-        if (viewModel.flag.flagCarried){
+        if (viewModel.flag.flagCarried && id == viewModel.flag.agentCarrying){
         	c = Color.magenta;
 	    	super.drawAgent(g, x, y, c, id);
 	    	g.setColor(Color.black);

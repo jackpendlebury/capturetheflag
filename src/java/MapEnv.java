@@ -37,22 +37,22 @@ public class MapEnv extends Environment {
     }
     
     public void updatePercepts(){
-		clearPercepts("player");
-		Location lplayer= model.getAgPos(0);
-		//use .equals()
-        if (lplayer.x == model.flag.getFlagLocX() && lplayer.y == model.flag.getFlagLocY()) {	//No idea why this works, but it just does.
-             addPercept("player", af);
-        }
-        if (lplayer.x == model.rBase.x && lplayer.y == model.rBase.y){
-        	addPercept("player", ab);
-        }        
+    	for(int i = 1; i <= model.TotAgt; i++){
+    		clearPercepts("player" + i);
+    		Location lplayer= model.getAgPos(i-1);
+            if (lplayer.equals(model.flag.getFlagLoc())) {
+                 addPercept("player" + i, af);
+            }
+            if (lplayer.equals(model.rBase)){
+            	addPercept("player" + i, ab);
+            }    
+    	}
     }
 
 	//This could be edited to include a 'sight length' parameter
 	//i.e. how far a player can see.
 	
 	//TODO: Make sure this to see's other players
-
 	public boolean look(int id, int sightLength){
 		Location p = model.getAgPos(id); Location l = p; int nearAgent;
 		for(int y = -sightLength; y <= sightLength; y++){
@@ -110,10 +110,10 @@ public class MapEnv extends Environment {
                         
             try {
             	if(dest == null || !model.isFree(dest)){
-            			//TODO: Change the source to unprotect this. There's no reason its protected!
+            			//TODO: Change the source to un-protect this. There's no reason its protected!
 //                		dest = model.getFreePos();
             	}
-                result = model.moveTowards(dest, 0); //0 is 1st Agent ID
+                result = model.moveTowards(dest, agName); //0 is 1st Agent ID
 //            	System.out.println(agName + " is moving to " + dest.toString());
                 
             } catch (Exception e) {
@@ -126,7 +126,7 @@ public class MapEnv extends Environment {
         } else if(action.equals(sf)){
         	result = model.scoreFlag(agName);
         } else if(action.equals(tk)){
-        	result = model.takeFlag(agName, 0);
+        	result = model.takeFlag(agName);
         }
         else logger.info("executing: "+action+", but not implemented!");
         return true;

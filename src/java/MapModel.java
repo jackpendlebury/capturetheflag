@@ -13,7 +13,7 @@ public class MapModel extends GridWorldModel {
 	public static final int GSize = 13;
 	
 	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
-	public static int TotAgt = 3;
+	public static int TotAgt = 1;
 	
 	//Environmental Variables
 	Flag flag = new Flag();
@@ -36,14 +36,12 @@ public class MapModel extends GridWorldModel {
 		add(FLAG, flag.getFlagLoc());
 	}
 	
-	@SuppressWarnings("unused")
 	void initAgents() {
-		
 		//Evenly spaces the agents out. Will later be placed in 2 different places based on team.
 		int pos = round(GSize/TotAgt) - round(GSize/5);
 		if(GSize >= TotAgt){
 			for(int i = 1; i <= TotAgt; i++){
-				System.out.println("player#" + (i-1));
+				System.out.println("player" + (i-1));
 				setAgPos((i-1), pos*i, GSize-2);
 			}
 		} else {
@@ -60,7 +58,8 @@ public class MapModel extends GridWorldModel {
 	//Action Functions
 	
 	//Agent Movement Action
-	boolean moveTowards(Location dest, int id){
+	boolean moveTowards(Location dest, String agName){
+		int id = getAgentID(agName);
 		Location p = getAgPos(id);
 		if(p == dest){
 			System.out.println("At destination");
@@ -90,11 +89,11 @@ public class MapModel extends GridWorldModel {
 	}
 	
 	public boolean pickupFlag(String agName){
-		System.out.println(agName + " has picked up the Flag");
 		if(!flag.flagCarried){
 			flag.setFlagCarried(true);
-//			flag.setAgentCarrying(//agName to agID);
+			flag.setAgentCarrying(getAgentID(agName));
 			view.update();
+			System.out.println(agName + " has the Flag!");
 			return true;
 		} else {
 			return false;
@@ -102,20 +101,19 @@ public class MapModel extends GridWorldModel {
 	}
 	
 	public boolean scoreFlag(String agName){
-		if(flag.flagCarried && flag.flagLoc == rBase){
-			flag.flagCarried = false;
-			flag.setAgentCarrying(-1);
-			rscore++;
-			flag.setFlagLoc(new Location(round(GSize/2),round(GSize/2)));
-			System.out.println(agName + " has Scored! The Score is Red - " + rscore + " Blue - " + bscore);
-			return true;
-		}
-		return false;
+		//Drop the Flag
+		flag.flagCarried = false;
+		flag.setAgentCarrying(-1);
+		//Increase the Score for the respective team.
+		rscore++;
+		//Reset Flag Location
+		flag.setFlagLoc(new Location(round(GSize/2),round(GSize/2)));
+		System.out.println(agName + " has Scored! The Score is Red - " + rscore + " Blue - " + bscore);
+		return true;
 	}
-	
-	//TODO: Find a way to get Agent ID from agName.
-	
-	public boolean takeFlag(String agName, int id){
+		
+	public boolean takeFlag(String agName){
+		int id = getAgentID(agName);
 		Location p = getAgPos(id);
 		if(flag.flagCarried && flag.getFlagLoc().isNeigbour(p)){
 			setAgPos(id, p.x+1, p.y+1);
@@ -124,22 +122,20 @@ public class MapModel extends GridWorldModel {
 		}
 		return false;
 	}
-	
-	//These two may be useless
-	
+		
 	public int getAgentID(String agName){
+		//INCREDABLEY IMPORTANT: All Agent names must be the same lenght, with the integer in the same place.
 		char[] l = agName.toCharArray();
-		int i = l[7];
+		//The Number below (l[x]) is the location of the number in the name.
+		int i = Character.getNumericValue(l[6]); i -= 1;
+//		System.out.println(agName + " = ID:" + i);
 		return i;
 	}
 	
 	//TODO: Implement Team detection
-	public String getAgentTeam(int id){
-		//Need an 2D array of id's w/ respective team. e.g. 0 - red, 1 - blue etc.
-		return null;
-	}
 	
 	public String getAgentTeam(String agName){
+		//Need an 2D array of id's w/ respective team. e.g. 0 - red, 1 - blue etc.
 		return null;
 	}
 

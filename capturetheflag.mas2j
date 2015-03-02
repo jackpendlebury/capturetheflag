@@ -11,9 +11,9 @@ MAS capturetheflag {
 //			agentArchClass jmoise.OrgManager;
 			
 		//Create 2 different types of agent, redplayer and blueplayer. Maybe green and yellow if blue and red works.
-		player;
-		player2;
-		player3;
+		player1;
+//		player2;
+//		player3;
 
 	aslSourcePath:
 		"src/asl";

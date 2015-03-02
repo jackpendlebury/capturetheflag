@@ -23,8 +23,9 @@ want(flag).
 +!score(flag) : got(flag) & not at(player, base) <- !at(player, base).
 +!score(flag) : got(flag) & at(player, base)
 <-	score(flag);
-	-got(flag).
-	
+	-got(flag);
+	.print("Flag Scored").
+
 +!at(player,P) : at(player, flag) & not got(flag) <- !pickup(flag).
 +!at(player,P) : at(player, base) & got(flag) <- !score(flag).
 +!at(player,P) : not at(player,P)
