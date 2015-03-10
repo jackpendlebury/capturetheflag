@@ -8,6 +8,7 @@ import java.awt.Graphics;
 public class MapView extends GridWorldView {
 	
 	MapModel viewModel;
+	Perception viewPercept;
 	
 	public MapView(MapModel model){
 		super(model, "Capture the Flag", 500);
@@ -17,21 +18,19 @@ public class MapView extends GridWorldView {
 		repaint();
 	}
 	
-	//TODO: [MAJOR] Implement Swing.
 	@Override
     public void draw(Graphics g, int x, int y, int object) {
-        Location lplayer = model.getAgPos(0);
-        super.drawAgent(g, x, y, Color.white, -1);
+	    super.drawAgent(g, x, y, Color.white, -1);
         switch (object) {
 	        case MapModel.BLU_BASE: 
-	            if (!lplayer.equals(viewModel.bBase)) {
+	            if (viewModel.isFree(viewModel.bBase)) {
 	            	super.drawAgent(g, x, y, Color.blue, -1);
 	            	g.setColor(Color.black);
 	            	super.drawString(g, x, y, defaultFont, "Blue Base");
 	            }
 	            break;
             case MapModel.RED_BASE: 
-                if (!lplayer.equals(viewModel.rBase)) {
+                if (viewModel.isFree(viewModel.rBase)) {
                 	super.drawAgent(g, x, y, Color.red, -1);
                 	g.setColor(Color.black);
                 	super.drawString(g, x, y, defaultFont, "Red Base");
@@ -54,10 +53,15 @@ public class MapView extends GridWorldView {
 	    	g.setColor(Color.black);
 	        super.drawString(g, x, y, defaultFont, "Flagholder");
         } else {
-        	c = Color.red;
-        	super.drawAgent(g, x, y, c, id);
-        	g.setColor(Color.black);
-        }
+        	if(id != -1){
+        		if(Perception.teamList.get(id) == "red"){
+            		c = Color.red;
+                	super.drawAgent(g, x, y, c, id);
+        		} else if(Perception.teamList.get(id) == "blue"){
+            		c = Color.blue;
+                	super.drawAgent(g, x, y, c, id);
+        		}
+        	}
+    	}
     }
-	
 }

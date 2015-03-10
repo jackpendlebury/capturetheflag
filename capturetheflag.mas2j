@@ -12,8 +12,9 @@ MAS capturetheflag {
 			
 		//Create 2 different types of agent, redplayer and blueplayer. Maybe green and yellow if blue and red works.
 		player1;
-//		player2;
-//		player3;
+		player2;
+		player3;
+		player4;
 
 	aslSourcePath:
 		"src/asl";

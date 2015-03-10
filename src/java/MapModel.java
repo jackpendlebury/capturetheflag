@@ -1,35 +1,35 @@
-//JMoise is IMPORTABLE :D
+import java.util.Random;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
 public class MapModel extends GridWorldModel {
 		
 	//Constants for the Environment Objects
-	public static final int BLU_BASE = 32;
-	public static final int RED_BASE = 16;
-    public static final int FLAG  = 64;
+	public static final int RED_BASE = 8;
+	public static final int BLU_BASE = 16;
+    public static final int FLAG 	 = 32;
 	
-	//Grid Size (try to keep it odd, or it looks strange)
-	public static final int GSize = 13;
+	//Grid Size (Keep it odd, or it looks strange)
+	public static final int GSize 	 = 15;
 	
 	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
-	public static int TotAgt = 1;
+	public static int 		TotAgt   = 4;
 	
 	//Environmental Variables
+	Perception percept = new Perception();
 	Flag flag = new Flag();
 	int rscore = 0; int bscore = 0;
 	
 	//Object Starting positions
 	Location rBase = new Location(round(GSize/2),round(GSize-1));
 	Location bBase = new Location(round(GSize/2),0);
-	
+		
 	public MapModel() {
 		//Create the Grid
 		super(GSize, GSize, TotAgt);
-		
 		//set initial locations of agents
-		initAgents();		
-		
+        Perception.initTeams();
+		initAgents();
 		//Places the map objects onto the grid
 		add(BLU_BASE, bBase);
 		add(RED_BASE, rBase);
@@ -38,11 +38,16 @@ public class MapModel extends GridWorldModel {
 	
 	void initAgents() {
 		//Evenly spaces the agents out. Will later be placed in 2 different places based on team.
-		int pos = round(GSize/TotAgt) - round(GSize/5);
+		Random random = new Random();
 		if(GSize >= TotAgt){
 			for(int i = 1; i <= TotAgt; i++){
-				System.out.println("player" + (i-1));
-				setAgPos((i-1), pos*i, GSize-2);
+				//Each agent is generated a random x coordinate, then placed on the y coordinate based on their team.
+				int r = random.nextInt(GSize-1) + 1;
+				if(percept.getTeam(i-1) == "red"){
+					setAgPos((i-1), r, rBase.y - 1);
+				} else if(percept.getTeam(i-1) == "blue"){
+					setAgPos((i-1), r, bBase.y + 1);
+				}
 			}
 		} else {
 			System.out.println("Grid Size must be greater than the total number of Agents");
@@ -62,7 +67,6 @@ public class MapModel extends GridWorldModel {
 		int id = getAgentID(agName);
 		Location p = getAgPos(id);
 		if(p == dest){
-			System.out.println("At destination");
 			return false;
 		}
 		
@@ -80,9 +84,10 @@ public class MapModel extends GridWorldModel {
 		
 		//Updates the Objects 
 		setAgPos(id, p);
+		
 		if (view != null) {
-			//Where the flag gets moved by the agent
-			if(flag.flagCarried) flag.setFlagLoc(p);
+			//Where the flag gets carried by the agent
+			if(flag.flagCarried && id == flag.agentCarrying) flag.setFlagLoc(p);
 			view.update();
         }
         return true;
@@ -105,38 +110,40 @@ public class MapModel extends GridWorldModel {
 		flag.flagCarried = false;
 		flag.setAgentCarrying(-1);
 		//Increase the Score for the respective team.
-		rscore++;
+		if(percept.getTeam(getAgentID(agName)) == "red"){
+			rscore++;
+		} else if(percept.getTeam(getAgentID(agName)) == "blue") {
+			bscore++;
+		}
 		//Reset Flag Location
-		flag.setFlagLoc(new Location(round(GSize/2),round(GSize/2)));
 		System.out.println(agName + " has Scored! The Score is Red - " + rscore + " Blue - " + bscore);
+		flag.setFlagLoc(new Location(round(GSize/2),round(GSize/2)));
 		return true;
 	}
 		
 	public boolean takeFlag(String agName){
 		int id = getAgentID(agName);
 		Location p = getAgPos(id);
+		//If the flag is being carried, and is in a neighbouring space to the agent
 		if(flag.flagCarried && flag.getFlagLoc().isNeigbour(p)){
-			setAgPos(id, p.x+1, p.y+1);
+			//Return the victim to their base.
+			setAgPos(flag.getAgentCarrying(), percept.getTeamBase(id));
+			//Set the tackler as the flagholder, and places them in the victim's place.
 			flag.setAgentCarrying(id);
+			setAgPos(id, flag.getFlagLocX(), flag.getFlagLocY());
 			return true;
 		}
 		return false;
 	}
 		
 	public int getAgentID(String agName){
-		//INCREDABLEY IMPORTANT: All Agent names must be the same lenght, with the integer in the same place.
-		char[] l = agName.toCharArray();
+		//INCREDABLEY IMPORTANT: All Agent names must be the same length, with the integer in the same place.
+		char[] l = new char[8];
+		l = agName.toCharArray();
 		//The Number below (l[x]) is the location of the number in the name.
 		int i = Character.getNumericValue(l[6]); i -= 1;
 //		System.out.println(agName + " = ID:" + i);
 		return i;
 	}
-	
-	//TODO: Implement Team detection
-	
-	public String getAgentTeam(String agName){
-		//Need an 2D array of id's w/ respective team. e.g. 0 - red, 1 - blue etc.
-		return null;
-	}
-
+		
 }
