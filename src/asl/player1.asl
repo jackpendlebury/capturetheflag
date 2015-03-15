@@ -9,10 +9,6 @@ want(flag).
 
 /* Plans */
 
-//Perhaps add a !wait goal. i.e. sortof just do nothing, like after the flag is scored or waiting for messages
-
-//Also add messages between players, (are you friendly?
-
 +!get(flag) : want(flag) & not at(player, flag) <-	!at(player,flag).
 +!get(flag) : want(flag) & at(player, flag) <- !pickup(flag).
 
@@ -20,15 +16,16 @@ want(flag).
 +!pickup(flag) : not at(player, flag) <- !get(flag).	
 +!pickup(flag) : want(flag) & at(player,flag) 
 	<- pickup(flag);
-	   -want(flag); +got(flag);
-	   !score(flag).
+	   -want(flag); +got(flag)
+;	   !score(flag).
 
 +!score(flag) : not got(flag) <- !get(flag).
 +!score(flag) : got(flag) & not at(player, base) <- !at(player, base).
 +!score(flag) : got(flag) & at(player, base)
 <-	score(flag);
 	-got(flag);
-	.print("Flag Scored").
+	.print("Flag Scored");
+	+want(flag); !get(flag).
 
 +!at(player,P) : at(player, flag) & not got(flag) <- !pickup(flag).
 +!at(player,P) : at(player, base) & got(flag) <- !score(flag).
