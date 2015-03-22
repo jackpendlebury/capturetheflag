@@ -18,7 +18,7 @@ public class MapModel extends GridWorldModel {
 	public static final int GSize 	 = 17;
 	
 	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
-	public static int 		TotAgt   = 4;
+	public static int 		TotAgt   = 2;
 	
 	//Team Bases
 	static final Location rBase = new Location(round(GSize/2),round(GSize-1));
@@ -114,7 +114,6 @@ public class MapModel extends GridWorldModel {
 		if (view != null) {
 			//Where the flag gets carried by the agent
 			if(flag.flagCarried && id == flag.agentCarrying) flag.setFlagLoc(p);
-			view.update();
         }
         return true;
 	}
@@ -124,7 +123,6 @@ public class MapModel extends GridWorldModel {
 			flag.setFlagCarried(true);
 			flag.setAgentCarrying(getAgentID(agName));
 			System.out.println("Agent Carrying = " + flag.getAgentCarrying());
-			view.update();
 			System.out.println(agName + " has the Flag!");
 			return true;
 		} else {
