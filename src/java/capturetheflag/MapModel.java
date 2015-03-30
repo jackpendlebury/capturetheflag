@@ -1,9 +1,6 @@
 package capturetheflag;
+
 import java.util.Random;
-
-import javax.management.modelmbean.ModelMBean;
-
-import jason.environment.Environment;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
@@ -18,7 +15,7 @@ public class MapModel extends GridWorldModel {
 	public static final int GSize 	 = 17;
 	
 	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
-	public static int 		TotAgt   = 2;
+	public static int 		TotAgt   = 1;
 	
 	//Team Bases
 	static final Location rBase = new Location(round(GSize/2),round(GSize-1));
@@ -113,7 +110,8 @@ public class MapModel extends GridWorldModel {
 		
 		if (view != null) {
 			//Where the flag gets carried by the agent
-			if(flag.flagCarried && id == flag.agentCarrying) flag.setFlagLoc(p);
+			if(flag.flagCarried && id == flag.agentCarrying) 
+				flag.setFlagLoc(p);
         }
         return true;
 	}
@@ -139,7 +137,6 @@ public class MapModel extends GridWorldModel {
 		} else if(percept.getTeam(getAgentID(agName)) == "blue") {
 			bscore++;
 		}
-		
 		//Print Score + Reset Flag Location
 		System.out.println(agName + " has Scored! The Score is Red - " + rscore + " Blue - " + bscore);
 		flag.setFlagLoc(flag.getFlagStartingLoc());
@@ -152,7 +149,7 @@ public class MapModel extends GridWorldModel {
 		//If the flag is being carried, and is in a neighbouring space to the agent
 		if(flag.flagCarried && flag.getFlagLoc().isNeigbour(p)){
 			//Return the victim to their base.
-			setAgPos(flag.getAgentCarrying(), percept.getTeamBase(id));
+			setAgPos(flag.getAgentCarrying(), Perception.getTeamBase(id));
 			//Set the tackler as the flagholder, and places them in the victim's place.
 			flag.setAgentCarrying(id);
 			setAgPos(id, flag.getFlagLocX(), flag.getFlagLocY());

@@ -1,16 +1,113 @@
 package capturetheflag;
 
-import jason.environment.grid.Location;
-
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Pathfinder {
-		private ArrayList<Location> closed = new ArrayList<Location>();
-		private ArrayList<Location> open   = new ArrayList<Location>();
+		private ArrayList<Node> closed = new ArrayList<Node>();
+		private ArrayList<Node> open   = new ArrayList<Node>();
 		private MapModel model = MapEnv.model;
 		private Node nodes[][];
+		int maxSearch;
+		
+		public Pathfinder(int maxSearch){
+			this.maxSearch = maxSearch;
+			//Initialise the 2D Node Array.
+			nodes = new Node[MapModel.GSize][MapModel.GSize];
+			for(int x = 0; x < MapModel.GSize; x++){
+				for(int y = 0; y < MapModel.GSize; y++){
+					nodes[x][y] = new Node(x,y);
+				}
+			}
+		}
 		
 		//Add the rest of the code HERE
+		public Path findPath(int agentID, int sx, int sy, int tx, int ty){
+			//If the target location is blocked, return 'null'
+			if(!model.isFree(tx, ty)){
+				return null;
+			}
+			
+			nodes[sx][sy].cost = 0;
+			nodes[sx][sy].depth = 0;
+			closed.clear();
+			open.clear();
+			addToOpen(nodes[sx][sy]);
+			nodes[tx][ty].parent = null;
+			
+			int maxDepth = 0;
+			while((maxDepth < maxSearch) && (open.size() != 0)){
+				
+				Node current = getFirstinOpen();
+				if(current == nodes[tx][ty]){
+					break;
+				}
+				removeFromOpen(current);
+				addToClosed(current);
+				
+				//Cycle through all the tiles neighbours
+				for(int x=-1;x<2;x++){
+					for(int y=-1;y<2;y++){
+						//Not a neighbor, but the current tile.
+						if ((x == 0) && (y == 0)) {
+							continue;
+						}
+						//determine the location of the tile
+						int xp = x + current.x;
+						int yp = y + current.y;
+						
+						if(isValidLocation(sx, sy, )){
+							
+						}
+						
+					}
+				}
+				
+			}
+			return null;
+		}
+		
+		protected boolean isValidLocation(int sx, int sy, int tx, int ty){
+			boolean invalid = (tx < 0) || (ty < 0) || (tx >= MapModel.GSize) || (ty >= MapModel.GSize);
+			
+			if((!invalid) && (sx != tx) && (sy != ty)){
+				invalid = model.isFree(tx, ty);
+			}
+			
+			return !invalid;
+		}
+		
+		protected Node getFirstinOpen(){
+			return open.get(0);
+		}
+		
+		protected void addToOpen(Node n){
+			open.add(n);
+		}
+		
+		protected boolean isInOpen(Node n){
+			return open.contains(n);
+		}
+		
+		protected void removeFromOpen(Node n){
+			open.remove(n);
+		}
+		
+		protected Node getFirstinClosed(){
+			return closed.get(0);
+		}
+		
+		protected void addToClosed(Node n){
+			closed.add(n);
+		}
+		
+		protected boolean isInClosed(Node n){
+			return closed.contains(n);
+		}
+		
+		protected void removeFromClosed(Node n){
+			closed.remove(n);
+		}
 		
 		public float getCost(MapModel model, int agent, int x, int y, int tx, int ty){
 			float dx = tx - x;
@@ -26,10 +123,10 @@ class Node implements Comparable<Node>{
 	int x;
 	int y;
 	
-	private float cost;
-	private Node parent;
-	private float heuristic;
-	private int depth;
+	float cost;
+	Node  parent;
+	float heuristic;
+	int   depth;
 	
 	public Node(int x, int y){
 		this.x = x;

@@ -12,7 +12,7 @@ public class MapEnv extends Environment {
 	public static final Literal pf  = Literal.parseLiteral("pickup(flag)");
 	public static final Literal tk  = Literal.parseLiteral("tackle(player)");
 	public static final Literal sf  = Literal.parseLiteral("score(flag)");
-	public static final Literal m  = Literal.parseLiteral("move");
+	public static final Literal n   = Literal.parseLiteral("move");
 
 	public static MapModel model;
 	public static MapView view;
@@ -32,24 +32,26 @@ public class MapEnv extends Environment {
     
     public void updatePercepts(String agName){
     	clearPercepts(agName);
+    	
     	ArrayList<Literal> atLocation = Perception.atLocation(agName);
     	if(!atLocation.isEmpty()){
     		for(int i=1; i <= atLocation.size(); i++){
     			addPercept(agName, atLocation.get(i-1));
     		}
     	}
+    	
+    	ArrayList<Literal> lookAround = Perception.lookAround(agName);
+    	if(!lookAround.isEmpty()){
+    		for(int i=1; i <= lookAround.size(); i++){
+    			addPercept(agName, lookAround.get(i-1));
+    		}
+    	}
     }
-
-	//This could be edited to include a 'sight length' parameter
-	//i.e. how far a player can see.
-	
-	//TODO: Make sure this to see's other players
-
-    @Override
+    
+    @SuppressWarnings("unused")
     public boolean executeAction(String agName, Structure action) {
     	int id = model.getAgentID(agName);
-    	Location lplayer = model.getAgPos(id);
-    	boolean result = false;
+		boolean result = false;
     	updatePercepts(agName);
     	if (action.getFunctor().equals("move_towards")) {
             String l = action.getTerm(0).toString();
@@ -63,7 +65,7 @@ public class MapEnv extends Environment {
             }
                         
         	if(dest == null || !model.isFree(dest)){
-//            		dest = getFreePos(dest);
+
         	}
             result = model.moveTowards(dest, agName);
             
@@ -73,7 +75,8 @@ public class MapEnv extends Environment {
         	result = model.scoreFlag(agName);
         } else if(action.equals(tk)){
         	result = model.takeFlag(agName);
-        } else if(action.equals(m)){
+        } else if(action.equals(n)){
+        	Location lplayer = model.getAgPos(id);
         	//This is a temporary 'nudge' action, that moves the agent away from the boundaries of the map.
         	if(Perception.getTeamBase(id) == MapModel.rBase){
             	result = model.moveTowards(new Location(lplayer.x, lplayer.y-1), agName);
@@ -85,7 +88,7 @@ public class MapEnv extends Environment {
     	
     	//Slows the Simulation down, to make it possible to see what's going on.
     	try {
-			Thread.sleep(175);
+			Thread.sleep(42);
 			view.update();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -94,7 +97,7 @@ public class MapEnv extends Environment {
     	return true;
     }
     
-    //This is utter Shit
+    //This is Utter Shit
     public Location getFreePos(Location dest) {
     	Random random = new Random();
     	int r = random.nextInt(8) + 1; Location l;

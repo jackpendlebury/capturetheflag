@@ -24,14 +24,14 @@ public class MapView extends GridWorldView {
 	    super.drawAgent(g, x, y, Color.white, -1);
         switch (object) {
 	        case MapModel.BLU_BASE: 
-	            if (viewModel.isFree(viewModel.bBase)) {
+	            if (viewModel.isFree(MapModel.bBase)) {
 	            	super.drawAgent(g, x, y, Color.blue, -1);
 	            	g.setColor(Color.black);
 	            	super.drawString(g, x, y, defaultFont, "Blue Base");
 	            }
 	            break;
             case MapModel.RED_BASE: 
-                if (viewModel.isFree(viewModel.rBase)) {
+                if (viewModel.isFree(MapModel.rBase)) {
                 	super.drawAgent(g, x, y, Color.red, -1);
                 	g.setColor(Color.black);
                 	super.drawString(g, x, y, defaultFont, "Red Base");
