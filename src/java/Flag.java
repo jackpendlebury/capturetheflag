@@ -3,13 +3,19 @@ import jason.environment.grid.Location;
 public class Flag{
 	
 	//Flag Starts in the center, AgentCarrying = -1 means flag not being carried.
-	public Location flagLoc = new Location(round(MapModel.GSize/2), round(MapModel.GSize/2));
+	public Location flagStartingLoc = new Location(round(MapModel.GSize/2), round(MapModel.GSize/2));
+	public Location flagLoc = flagStartingLoc;
 	public boolean flagCarried = false;
 	public int agentCarrying = -1;
-	public Flag() {
-
-	}
 	
+	public Flag() {
+		
+	}
+		
+	public Location getFlagStartingLoc() {
+		return flagStartingLoc;
+	}
+
 	public Location getFlagLoc() {
 		return flagLoc;
 	}
@@ -28,6 +34,11 @@ public class Flag{
 
 	public int getAgentCarrying() {
 		return agentCarrying;
+	}
+	
+	public void dropFlag(){
+		setAgentCarrying(-1);
+		flagCarried = false;
 	}
 
 	public void setFlagLoc(Location flagLoc) {

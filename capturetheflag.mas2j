@@ -2,7 +2,7 @@ MAS capturetheflag {
 	
 	infrastructure: Centralised
 
-	environment: capturetheflag.MapEnv(gui)
+	environment: MapEnv(gui)
 
 	agents:
 				

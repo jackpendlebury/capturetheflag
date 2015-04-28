@@ -1,101 +1,112 @@
+
 import java.util.ArrayList;
 
-import jason.asSyntax.Literal;
+import jason.asSyntax.*;
 import jason.environment.Environment;
 import jason.environment.grid.*;
 
-public class Perception extends Environment {
+public class Perception extends Environment implements InterfacePercept {
 	
 	private static final Literal af  = Literal.parseLiteral("at(player,flag)");
 	private static final Literal ab  = Literal.parseLiteral("at(player,base)");
-	private static final Literal nf  = Literal.parseLiteral("near(flag)");
-	private static final Literal nb  = Literal.parseLiteral("near(base)");
 	private static final Literal nfh = Literal.parseLiteral("near(flagholder)");
-//	private static final Literal npf = Literal.parseLiteral("near(player, friendly)");
-//	private static final Literal npn = Literal.parseLiteral("near(player, nasty)");
+	private static final Literal npf  = Literal.parseLiteral("near(player,friendly)");
+	private static final Literal npe  = Literal.parseLiteral("near(player,enemy)");
+		
+	public static ArrayList<String>  teamList = new ArrayList<String>();
+	static MapModel perceptModel;
+	static MapEnv mapenv;
 	
-	public static ArrayList<String> teamList = new ArrayList<String>();
-	MapModel model;
+	public ArrayList<Literal> atLocation(String agName){
+		perceptModel = MapEnv.model;
+		ArrayList<Literal> atLoc = new ArrayList<Literal>();
+		if(perceptModel != null){
+			//Initialise the Agent Variables
+			Flag  	 perceptFlag = perceptModel.flag;
+			int 	 id = perceptModel.getAgentID(agName);
+			Location lplayer = perceptModel.getAgPos(id); 
+
+			//Return the Literals for adding the Perceptions
+	        if (lplayer.equals(perceptFlag.getFlagLoc())) 
+	        	atLoc.add(af);
+	        if (lplayer.equals(getTeamBase(id)))
+	        	atLoc.add(ab);
+	        return atLoc;
+		} return null;
+	}
 	
-	public void updatePercepts(String agName){
-		if(agName != null){
-			clearPercepts(agName);
-//			System.out.println(agName + " Percepts Cleared");
-			atLocation(agName);
-//	        lookAround(agName);
+	//TODO: LookAround still not working
+	
+	public ArrayList<Literal> lookAround(String agName){
+		perceptModel = MapEnv.model;
+		ArrayList<Literal> lookArr  = new ArrayList<Literal>();
+		int 	 id 	 	  = perceptModel.getAgentID(agName);
+		Location lplayer 	  = perceptModel.getAgPos(id); 
+
+		for(int y = -1; y <= 1; y++){
+			for(int x = -1; x <= 1; x++){
+				if(x != 0 && y != 0){
+					Location l = new Location(lplayer.x + x, lplayer.y + y);
+	//				System.out.println("Player Loc: (" + lplayer.x + "," + lplayer.y + "):: See Loc (" + l.x + "," + l.y + ")");
+					if(perceptModel.getAgAtPos(l) != -1 ){
+						int agt = perceptModel.getAgAtPos(l);
+						if(l.equals("FLAG")){
+							lookArr.add(nfh);
+						}
+						if(getTeam(agt) == getTeam(id)){
+							lookArr.add(npf);
+						} else if(getTeam(agt) != getTeam(id)) {
+							lookArr.add(npe);
+						}
+					}
+				}
+			}
 		}
-    }
+		for(int y = -2; y <= 2; y+=4){
+			for(int x = -2; x <= 2; x+=4){
+				Location l = new Location(lplayer.x + x, lplayer.y + y);
+//				System.out.println("Player Loc: (" + lplayer.x + "," + lplayer.y + "):: See Loc (" + l.x + "," + l.y + ")");
+				if(perceptModel.getAgAtPos(l) != -1 ){
+					int agt = perceptModel.getAgAtPos(l);
+					if(l.equals("FLAG")){
+						lookArr.add(nfh);
+					}
+					if(getTeam(agt) == getTeam(id)){
+						lookArr.add(npf);
+					} else if(getTeam(agt) != getTeam(id)) {
+						lookArr.add(npe);
+					}
+				}
+			}
+		}
+		return lookArr;
+	}
 	
+	public static void initTeams(){
+		for(int i = 0; i <= MapModel.TotAgt; i++){
+			//If the player ID is even, the player is Red
+			if(i % 2 == 0){
+				teamList.add("blue");
+			} else {
+			//Else the player is blue
+				teamList.add("red");
+			}
+		}
+		System.out.println("Teams Initialised");
+	}
+
 	public String getTeam(int id){
 		return teamList.get(id);
 	}
 	
 	public Location getTeamBase(int id){
+		//Returns the Agents base, or their own location if something goes wrong
 		if(teamList.get(id) == "red"){
-			return model.rBase;
+			return MapModel.rBase;
 		} else if(teamList.get(id) == "blue") {
-			return model.bBase;
+			return MapModel.bBase;
 		} else {
-			return model.getAgPos(id);
-		}
-	}
-	
-	public static void initTeams(){
-		for(int i = 0; i <= MapModel.TotAgt; i++){
-			if(i % 2 == 0){
-				teamList.add("red");
-			} else {
-				teamList.add("blue");
-			}
-		}
-		System.out.println("Teams Initialised");
-	}
-	
-	private void atLocation(String agName){
-		//TODO: This functions throws a NullPointerException when called. Pain in the Arse
-		Location lplayer; int id = model.getAgentID(agName);
-		lplayer = model.getAgPos(id);
-		System.out.println("Player Location: " + lplayer);
-        if (lplayer.equals(model.flag.getFlagLoc())) {
-             addPercept(agName, af);
-        }
-        if (lplayer.equals(model.rBase)){
-        	addPercept(agName, ab);
-        }
-		System.out.println("AtLocation Cleared");
-	}
-	
-	private void see(Location l, int id){
-		if(model.getAgAtPos(l) != -1 && l.equals("FLAG"))
-			addPercept(nfh);
-		if(l.equals("OBSTICLE"))
-			addPercept("Wall @"); //Fix the if(space full) at MoveTowards before this.
-		if(l.equals("FLAG"))
-			addPercept(nf);
-		if(teamList.get(id) == "red" && l.equals("RED_BASE"))
-			addPercept(nb);
-		if(teamList.get(id) == "blue" && l.equals("BLU_BASE"))
-			addPercept(nb);
-	}
-	
-	//TODO: Sight not quite ready yet
-	private void lookAround(String agName){
-		int id = model.getAgentID(agName);
-		Location agt = model.getAgPos(id); 
-		Location l = agt;
-		for(int y = -2; y <= 2; y++){
-			for(int x = -2; x <= 2; x++){
-				l.x = agt.x + x;
-				l.y = agt.y + y;
-				see(l, id);
-			}
-		}
-		for(int y = -3; y <= 3; y+=6){
-			for(int x = 3; x <= 3; x+=6){
-				l.x = agt.x + x;
-				l.y = agt.y + y;
-				see(l, id);
-			}
+			return null;
 		}
 	}
 

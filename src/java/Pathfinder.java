@@ -1,9 +1,6 @@
-package capturetheflag;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 
-public class Pathfinder {
+public class Pathfinder implements InterfacePath {
 		private ArrayList<Node> closed = new ArrayList<Node>();
 		private ArrayList<Node> open   = new ArrayList<Node>();
 		private MapModel model = MapEnv.model;
@@ -21,10 +18,10 @@ public class Pathfinder {
 			}
 		}
 		
-		//Add the rest of the code HERE
-		public Path findPath(int agentID, int sx, int sy, int tx, int ty){
+		public Node findPath(int agentID, int sx, int sy, int tx, int ty){
 			//If the target location is blocked, return 'null'
 			if(!model.isFree(tx, ty)){
+//				System.out.println("Target Location not Free");
 				return null;
 			}
 			
@@ -37,7 +34,6 @@ public class Pathfinder {
 			
 			int maxDepth = 0;
 			while((maxDepth < maxSearch) && (open.size() != 0)){
-				
 				Node current = getFirstinOpen();
 				if(current == nodes[tx][ty]){
 					break;
@@ -46,9 +42,9 @@ public class Pathfinder {
 				addToClosed(current);
 				
 				//Cycle through all the tiles neighbours
-				for(int x=-1;x<2;x++){
-					for(int y=-1;y<2;y++){
-						//Not a neighbor, but the current tile.
+				for(int x = -1; x < 2; x++){
+					for(int y = -1; y < 2; y++){
+						//Not a neighbour, but the current tile.
 						if ((x == 0) && (y == 0)) {
 							continue;
 						}
@@ -56,16 +52,63 @@ public class Pathfinder {
 						int xp = x + current.x;
 						int yp = y + current.y;
 						
-						if(isValidLocation(sx, sy, )){
+						if(isValidLocation(sx, sy, xp, yp) && !nodes[xp][yp].visited){
+							Node neighbour = nodes[xp][yp];
+							neighbour.visited = true;
+							float nextStepCost = current.cost + getCost(sx, sy, xp, yp);
+//							System.out.println("Current Cost = ("+ nodes[xp][yp].cost +")");
+							/** 
+							 *  If the new cost we found is lower than previously thought then
+							 *  the neighbour must be re-evaluated.
+							 */
+							if(nextStepCost > neighbour.cost){
+								if(isInOpen(neighbour)){
+									removeFromOpen(neighbour);
+								}
+								if(isInClosed(neighbour)){
+									removeFromClosed(neighbour);
+								}
+							}
 							
+							if(!isInOpen(neighbour) && !isInClosed(neighbour)){
+								neighbour.cost = nextStepCost;
+								neighbour.heuristic = getCost(neighbour.x,neighbour.y,tx,ty);
+								maxDepth = Math.max(maxDepth, neighbour.setParent(current));
+								addToOpen(neighbour);
+							}
 						}
-						
 					}
 				}
 				
 			}
-			return null;
+//			if(!open.isEmpty()){
+//				Node best = closed.get(0);
+//				for (int i = 1; i < closed.size(); i++) {
+//					if(best.compareTo(closed.get(i)) < 0){
+//						best = closed.get(i);
+//					}
+//				}
+//				return best;
+//			}
+//			return null;
+			
+			
+			if(nodes[tx][ty].parent == null){
+//				System.out.println("No Path");
+				return null;
+			}
+			
+			Path path = new Path();
+			Node target = nodes[tx][ty];
+			while(target != nodes[sx][sy]){
+				path.prependStep(target.x, target.y);
+				target = target.parent;
+			}
+			path.prependStep(sx, sy);
+			System.out.println("Found Path");
+			return path.getNextStep();
 		}
+		
 		
 		protected boolean isValidLocation(int sx, int sy, int tx, int ty){
 			boolean invalid = (tx < 0) || (ty < 0) || (tx >= MapModel.GSize) || (ty >= MapModel.GSize);
@@ -109,7 +152,7 @@ public class Pathfinder {
 			closed.remove(n);
 		}
 		
-		public float getCost(MapModel model, int agent, int x, int y, int tx, int ty){
+		public float getCost(int x, int y, int tx, int ty){
 			float dx = tx - x;
 			float dy = ty - y;
 			
@@ -127,6 +170,7 @@ class Node implements Comparable<Node>{
 	Node  parent;
 	float heuristic;
 	int   depth;
+	boolean visited = false;
 	
 	public Node(int x, int y){
 		this.x = x;
@@ -157,8 +201,13 @@ class Node implements Comparable<Node>{
 class Path{
 	private ArrayList<Node> steps = new ArrayList<Node>();
 	
-	public Path(){
-		
+	public Node getNextStep(){
+		if(getLength() != 0){
+			
+			return steps.get(0);
+		} else {
+			return null;
+		}
 	}
 	
 	public int getLength(){
