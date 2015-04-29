@@ -9,9 +9,7 @@ public class Perception extends Environment implements InterfacePercept {
 	
 	private static final Literal af  = Literal.parseLiteral("at(player,flag)");
 	private static final Literal ab  = Literal.parseLiteral("at(player,base)");
-	private static final Literal nfh = Literal.parseLiteral("near(flagholder)");
-	private static final Literal npf  = Literal.parseLiteral("near(player,friendly)");
-	private static final Literal npe  = Literal.parseLiteral("near(player,enemy)");
+	private static final Literal hf  = Literal.parseLiteral("have(flag)");
 		
 	public static ArrayList<String>  teamList = new ArrayList<String>();
 	static MapModel perceptModel;
@@ -27,6 +25,8 @@ public class Perception extends Environment implements InterfacePercept {
 			Location lplayer = perceptModel.getAgPos(id); 
 
 			//Return the Literals for adding the Perceptions
+			if(perceptModel.flag.agentCarrying == id)
+				atLoc.add(hf);
 	        if (lplayer.equals(perceptFlag.getFlagLoc())) 
 	        	atLoc.add(af);
 	        if (lplayer.equals(getTeamBase(id)))
@@ -48,15 +48,15 @@ public class Perception extends Environment implements InterfacePercept {
 				if(x != 0 && y != 0){
 					Location l = new Location(lplayer.x + x, lplayer.y + y);
 	//				System.out.println("Player Loc: (" + lplayer.x + "," + lplayer.y + "):: See Loc (" + l.x + "," + l.y + ")");
-					if(perceptModel.getAgAtPos(l) != -1 ){
+					if(perceptModel.getAgAtPos(l) != -1){
 						int agt = perceptModel.getAgAtPos(l);
+						String plyr = perceptModel.getAgName(agt);
 						if(l.equals("FLAG")){
+							Literal nfh = Literal.parseLiteral("flagholder(" + plyr + ")");
 							lookArr.add(nfh);
-						}
-						if(getTeam(agt) == getTeam(id)){
-							lookArr.add(npf);
-						} else if(getTeam(agt) != getTeam(id)) {
-							lookArr.add(npe);
+						} else {
+							Literal np = Literal.parseLiteral("near(" + plyr + ")"); 
+							lookArr.add(np);
 						}
 					}
 				}
@@ -67,14 +67,14 @@ public class Perception extends Environment implements InterfacePercept {
 				Location l = new Location(lplayer.x + x, lplayer.y + y);
 //				System.out.println("Player Loc: (" + lplayer.x + "," + lplayer.y + "):: See Loc (" + l.x + "," + l.y + ")");
 				if(perceptModel.getAgAtPos(l) != -1 ){
-					int agt = perceptModel.getAgAtPos(l);
+					int 	agt = perceptModel.getAgAtPos(l);
+					String plyr = perceptModel.getAgName(agt);
 					if(l.equals("FLAG")){
+						Literal nfh = Literal.parseLiteral("flagholder(" + plyr + ")");
 						lookArr.add(nfh);
-					}
-					if(getTeam(agt) == getTeam(id)){
-						lookArr.add(npf);
-					} else if(getTeam(agt) != getTeam(id)) {
-						lookArr.add(npe);
+					} else {
+						Literal np = Literal.parseLiteral("near(" + plyr + ")"); 
+						lookArr.add(np);
 					}
 				}
 			}

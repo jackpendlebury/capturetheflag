@@ -9,9 +9,9 @@ import java.util.logging.*;
 public class MapEnv extends Environment {
 	
 	public static final Literal pf  = Literal.parseLiteral("pickup(flag)");
-	public static final Literal tk  = Literal.parseLiteral("tackle(player)");
+	public static final Literal tk  = Literal.parseLiteral("tackle");
 	public static final Literal sf  = Literal.parseLiteral("score(flag)");
-	public static final Literal n   = Literal.parseLiteral("move");
+	public static final Literal p   = Literal.parseLiteral("pause");
 
 	public static MapModel model;
 	public static MapView view;
@@ -68,7 +68,7 @@ public class MapEnv extends Environment {
             	dest = model.flag.getFlagLoc();
             }
             
-            Node next = pathFinder.findPath(id, lplayer.x, lplayer.y, dest.x, dest.y);
+//          Node next = pathFinder.findPath(id, lplayer.x, lplayer.y, dest.x, dest.y);
             result = model.moveTo(id, dest.x, dest.y);
             
         } else if(action.equals(pf)){
@@ -76,14 +76,10 @@ public class MapEnv extends Environment {
         } else if(action.equals(sf)){
         	result = model.scoreFlag(agName);
         } else if(action.equals(tk)){
-        	result = model.takeFlag(agName);
-        } else if(action.equals(n)){
-//        	//This is a temporary 'nudge' action, that moves the agent away from the boundaries of the map.
-//        	if(Perception.getTeamBase(id) == MapModel.rBase){
-//            	result = model.moveTowards(new Location(lplayer.x, lplayer.y-1), agName);
-//        	} else {
-//            	result = model.moveTowards(new Location(lplayer.x, lplayer.y+1), agName);
-//        	}
+        	String t = action.getTerm(0).toString();
+        	result = model.takeFlag(agName, t);
+        } else if(action.equals(p)){
+        	//This is a temporary 'nudge' action, that moves the agent away from the boundaries of the map.
         }
         else logger.info("executing: "+action+", but not implemented!");
     	

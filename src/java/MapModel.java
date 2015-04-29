@@ -142,13 +142,13 @@ public class MapModel extends GridWorldModel {
 		return true;
 	}
 		
-	public boolean takeFlag(String agName){
+	public boolean takeFlag(String agName, String t){
 		int id = getAgentID(agName);
-		Location p = getAgPos(id);
+		int target = getAgentID(t);
 		//If the flag is being carried, and is in a neighbouring space to the agent
-		if(flag.flagCarried && flag.getFlagLoc().isNeigbour(p)){
+		if(flag.flagCarried && flag.agentCarrying == target){
 			//Return the victim to their base.
-			setAgPos(flag.getAgentCarrying(), percept.getTeamBase(id));
+			setAgPos(target, percept.getTeamBase(target));
 			//Set the tackler as the flagholder, and places them in the victim's place.
 			flag.setAgentCarrying(id);
 			setAgPos(id, flag.getFlagLocX(), flag.getFlagLocY());
@@ -163,8 +163,11 @@ public class MapModel extends GridWorldModel {
 		l = agName.toCharArray();
 		//The Number (l[x]) is the location of the number in the name.
 		int i = Character.getNumericValue(l[6]); i -= 1;
-//		System.out.println(agName + " = ID:" + i);
 		return i;
+	}
+	
+	public String getAgName(int id){
+		return "player" + (id+1);
 	}
 		
 }
