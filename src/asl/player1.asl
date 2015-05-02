@@ -1,41 +1,44 @@
 // Agent player in project capturetheflag
 
 /* Initial beliefs */
-want(flag).
 
 /* Initial goals */
 
-!get(flag).
+!get.
 
 /* Plans */
 
-+!get(flag) : want(flag) & not at(player, flag) <-	!at(player,flag).
-+!get(flag) : want(flag) & at(player, flag) <- !pickup(flag).
++!get : not at(player,flag) <-	!at(player,flag); .fail_goal(get).
++!get : at(player,flag) <- !pickup; .fail_goal(get).
 
-+got(flag) : not have(flag) <- -got(flag); +want(flag).
-+!pickup(flag) : got(flag) <- !score(flag).	
-+!pickup(flag) : not at(player, flag) <- !get(flag).	
-+!pickup(flag) : want(flag) & at(player,flag) 
-	<-  pickup(flag);
-	   -want(flag); +got(flag);
-	   !score(flag).
++!pickup : have(flag) <-  !score; .fail_goal(pickup).	
++!pickup : not at(player,flag) <- !get; .fail_goal(pickup).	
++!pickup : at(player,flag) 
+	<-  pickup;
+	   !score;
+	   .succeed_goal(pickup).
 
-+!score(flag) : not got(flag) <- !get(flag).
-+!score(flag) : got(flag) & not at(player, base) <- !at(player, base).
-+!score(flag) : got(flag) & at(player, base)
-<-	 score(flag);
-	-got(flag);
-	 pause;
-	+want(flag);
-	!get(flag).
++!score : not have(flag) <- !get; .fail_goal(score).
++!score : have(flag) & not at(player,base) <- !at(player,base); .fail_goal(score).
++!score : have(flag) & at(player,base)
+<-	 score;
+	!get;
+	.succeed_goal(score);
+	.drop_all_intentions.
 
-+!at(player,P) : at(player, flag) & not got(flag) <- !pickup(flag).
-+!at(player,P) : at(player, base) & got(flag) <- !score(flag).
++!at(player,P) : at(player,flag) & not have(flag) <- !pickup; .fail_goal(at(player,P)).
++!at(player,P) : at(player,base) & have(flag) <- !score; .fail_goal(at(player,P)).
+
 +!at(player,P) : not at(player,P)
   <-  move_towards(P);
      !at(player,P).
+     
++!tackle : flagholder(X) <- tackle(X).
 
-+near(A) 		  <- .send(A,tell,near(blue)).
-+blue[source(C)]  <- +blue(C).			 
-+red[source(D)]   <- +red(D).
++at(player,base) : not have(flag) <- !get.
++flagholder(X) <- !!tackle.
++close(A) 		<- .send(A,tell,near(blue)).
++near(red)[source(C)] : not C <- -near(red);
+								 +C.
+						
 					  

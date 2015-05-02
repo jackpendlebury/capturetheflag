@@ -2,12 +2,12 @@ MAS capturetheflag {
 	
 	infrastructure: Centralised
 
-	environment: MapEnv(gui)
+	environment: capturetheflag.MapEnv(gui)
 
 	agents:
 				
 		player1;
-//		player2;
+		player2;
 //		player3;
 //		player4;
 
