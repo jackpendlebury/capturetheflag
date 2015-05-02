@@ -1,3 +1,4 @@
+package capturetheflag;
 import java.util.ArrayList;
 
 public class Pathfinder implements InterfacePath {

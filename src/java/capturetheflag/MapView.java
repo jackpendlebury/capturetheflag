@@ -1,3 +1,4 @@
+package capturetheflag;
 import jason.environment.grid.*;
 
 import java.awt.Color;

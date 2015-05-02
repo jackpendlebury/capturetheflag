@@ -1,19 +1,21 @@
+package capturetheflag;
 import java.util.Random;
+
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
 public class MapModel extends GridWorldModel {
 		
 	//Constants for the Environment Objects
-	public static final int RED_BASE = 8;
+	public static final int RED_BASE = 32;
 	public static final int BLU_BASE = 16;
-    public static final int FLAG 	 = 32;
+    public static final int FLAG 	 = 8;
 	
 	//Grid Size (Keep it odd, or it looks strange)
-	public static final int GSize 	 = 17;
+	public static final int GSize 	 = 11;
 	
 	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
-	public static int 		TotAgt   = 1;
+	public static int 		TotAgt   = 2;
 	
 	//Team Bases
 	static final Location rBase = new Location(round(GSize/2),round(GSize-1));
@@ -21,7 +23,7 @@ public class MapModel extends GridWorldModel {
 	
 	//Environmental Variables
 	InterfacePercept percept = new Perception();
-	Flag flag 		   = new Flag();
+	Flag 			 flag 	 = new Flag(round(MapModel.GSize/2), round(MapModel.GSize/2)); 		         
 	//Scores
 	int rscore = 0; int bscore = 0;
 		
@@ -32,28 +34,28 @@ public class MapModel extends GridWorldModel {
         Perception.initTeams();
 		initAgents();
 		//Load the Preset Wall Configuration (0 for None)
-		initMaps(0);
+		initMap(0);
 		//Places the map objects onto the grid
 		add(BLU_BASE, bBase);
 		add(RED_BASE, rBase);
-		add(FLAG, flag.getFlagStartingLoc());
+		add(FLAG, flag.getFlagLoc());
 	}
 	
-	void initMaps(int i){
+	void initMap(int i){
 		switch(i){
-		case 1:
-			//One Horizontal Centre wall
-			addWall(0, round(GSize/2), round(GSize/2) - 1, round(GSize/2));
-			addWall(round(GSize/2) + 1, round(GSize/2), GSize - 1, round(GSize/2));
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-		case 4:
-			break;
-		default:
-			break;
+			case 1:
+				//One Horizontal Centre wall
+				addWall(0, round(GSize/2), round(GSize/2) - 1, round(GSize/2));
+				addWall(round(GSize/2) + 1, round(GSize/2), GSize - 1, round(GSize/2));
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			default:
+				break;
 		}
 	}
 	
@@ -88,7 +90,7 @@ public class MapModel extends GridWorldModel {
 		Location lplayer = getAgPos(id);
 		Location dest = new Location(dx, dy);
 //		System.out.println("dest = " + dx + "," + dy);
-		if(lplayer == dest){
+		if(lplayer == dest || !isFree(dest)){
 			return false;
 		} else {
 			Location p = lplayer;
@@ -109,14 +111,16 @@ public class MapModel extends GridWorldModel {
 
 		if (view != null) {
 			//Where the flag gets carried by the agent
-			if(flag.flagCarried && id == flag.agentCarrying) 
+			if(flag.flagCarried && id == flag.agentCarrying){
 				flag.setFlagLoc(lplayer);
+			}
+			view.update();
         }
         return true;
 	}
 	
 	public boolean pickupFlag(String agName){
-		if(!flag.flagCarried && flag.agentCarrying == -1){
+		if(!flag.flagCarried){
 			flag.setFlagCarried(true);
 			flag.setAgentCarrying(getAgentID(agName));
 			System.out.println("Agent Carrying = " + flag.getAgentCarrying());
@@ -128,33 +132,48 @@ public class MapModel extends GridWorldModel {
 	}
 	
 	public boolean scoreFlag(String agName){
-		//Drop the Flag
-		flag.dropFlag();
-		//Increase the Score for the respective team.
-		if(percept.getTeam(getAgentID(agName)) == "red"){
-			rscore++;
-		} else if(percept.getTeam(getAgentID(agName)) == "blue") {
-			bscore++;
+		if(flag.agentCarrying == getAgentID(agName)){
+			//Drop the Flag
+			flag.dropFlag();
+			//Increase the Score for the respective team.
+			if(percept.getTeam(getAgentID(agName)) == "red"){
+				rscore++;
+			} else if(percept.getTeam(getAgentID(agName)) == "blue") {
+				bscore++;
+			}
+			remove(FLAG, flag.getFlagLoc());
+			flag.setFlagLoc(flag.getRandomFlagLoc());
+			add(FLAG, flag.getFlagLoc());
+			//Print Score + Reset Flag Location
+			System.out.println(agName + " has Scored! The Score is Red - " + rscore + " Blue - " + bscore);
+			return true;
+		} else {
+			return false;
 		}
-		//Print Score + Reset Flag Location
-		System.out.println(agName + " has Scored! The Score is Red - " + rscore + " Blue - " + bscore);
-		flag.setFlagLoc(flag.getFlagStartingLoc());
-		return true;
 	}
 		
-	public boolean takeFlag(String agName, String t){
+	public boolean takeFlag(String agName, String tName){
 		int id = getAgentID(agName);
-		int target = getAgentID(t);
+		int target = getAgentID(tName);
 		//If the flag is being carried, and is in a neighbouring space to the agent
 		if(flag.flagCarried && flag.agentCarrying == target){
-			//Return the victim to their base.
+			flag.dropFlag();
+			remove(FLAG, flag.getFlagLoc());
+			//Return the target to their base.
 			setAgPos(target, percept.getTeamBase(target));
-			//Set the tackler as the flagholder, and places them in the victim's place.
-			flag.setAgentCarrying(id);
-			setAgPos(id, flag.getFlagLocX(), flag.getFlagLocY());
 			return true;
 		}
 		return false;
+	}
+	
+	public Location getResetLoc(int id){
+		if(percept.getTeamBase(id) == bBase){
+			return new Location(bBase.x, bBase.y + 1);
+		} else if(percept.getTeamBase(id) == rBase){
+			return new Location(rBase.x, rBase.y - 1);
+		} else {
+			return new Location(round(GSize/2), round(GSize/2));
+		}
 	}
 		
 	public int getAgentID(String agName){
