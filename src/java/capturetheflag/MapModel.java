@@ -12,20 +12,20 @@ public class MapModel extends GridWorldModel {
     public static final int FLAG 	 = 8;
 	
 	//Grid Size (Keep it odd, or it looks strange)
-	public static final int GSize 	 = 11;
+	public static int GSize 	 = 15;
 	
 	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
 	public static int 		TotAgt   = 2;
 	
 	//Team Bases
-	static final Location rBase = new Location(round(GSize/2),round(GSize-1));
-	static final Location bBase = new Location(round(GSize/2),0);
+	public static final Location rBase = new Location(round(GSize/2),round(GSize-1));
+	public static final Location bBase = new Location(round(GSize/2),0);
 	
 	//Environmental Variables
 	InterfacePercept percept = new Perception();
-	Flag 			 flag 	 = new Flag(round(MapModel.GSize/2), round(MapModel.GSize/2)); 		         
+	public Flag 	 flag 	 = new Flag(round(MapModel.GSize/2), round(MapModel.GSize/2)); 		         
 	//Scores
-	int rscore = 0; int bscore = 0;
+	public int rscore = 0; public int bscore = 0;
 		
 	public MapModel() {
 		//Create the Grid
@@ -59,10 +59,10 @@ public class MapModel extends GridWorldModel {
 		}
 	}
 	
-	void initAgents() {
+	public boolean initAgents() {
 		//Detects a player's team, then places them in an appropriate position.
 		Random random = new Random();
-		if(GSize >= TotAgt){
+		if(GSize >= TotAgt && GSize != 0 && TotAgt != 0){
 			for(int i = 1; i <= TotAgt; i++){
 				//Each agent is generated a random x coordinate, then placed on the y coordinate based on their team.
 				int r = random.nextInt(GSize-1) + 1;
@@ -72,13 +72,15 @@ public class MapModel extends GridWorldModel {
 					setAgPos((i-1), r, bBase.y + 1);
 				}
 			}
+			return true;
 		} else {
-			System.out.println("Grid Size must be greater than the total number of Agents");
+//			System.out.println("Grid Size must be greater than the total number of Agents");
+			return false;
 		}
 	}
 
 	//TODO: Better Round function
-	static int round(double d){
+	public static int round(double d){
 		int x = (int) d;
 		return x;
 	}
@@ -90,7 +92,7 @@ public class MapModel extends GridWorldModel {
 		Location lplayer = getAgPos(id);
 		Location dest = new Location(dx, dy);
 //		System.out.println("dest = " + dx + "," + dy);
-		if(lplayer == dest || !isFree(dest)){
+		if(lplayer == dest){
 			return false;
 		} else {
 			Location p = lplayer;
@@ -106,7 +108,9 @@ public class MapModel extends GridWorldModel {
 			} else if (p.y > dest.y){
 				p.y--;
 			}
-			setAgPos(id, p.x, p.y);
+			if(isFree(p)){
+				setAgPos(id, p.x, p.y);
+			}
 		}
 
 		if (view != null) {
@@ -153,7 +157,6 @@ public class MapModel extends GridWorldModel {
 	}
 		
 	public boolean takeFlag(String agName, String tName){
-		int id = getAgentID(agName);
 		int target = getAgentID(tName);
 		//If the flag is being carried, and is in a neighbouring space to the agent
 		if(flag.flagCarried && flag.agentCarrying == target){
@@ -164,16 +167,6 @@ public class MapModel extends GridWorldModel {
 			return true;
 		}
 		return false;
-	}
-	
-	public Location getResetLoc(int id){
-		if(percept.getTeamBase(id) == bBase){
-			return new Location(bBase.x, bBase.y + 1);
-		} else if(percept.getTeamBase(id) == rBase){
-			return new Location(rBase.x, rBase.y - 1);
-		} else {
-			return new Location(round(GSize/2), round(GSize/2));
-		}
 	}
 		
 	public int getAgentID(String agName){

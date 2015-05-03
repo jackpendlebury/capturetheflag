@@ -20,7 +20,7 @@ public class Perception extends Environment implements InterfacePercept {
 	public ArrayList<Literal> atLocation(String agName){
 		perceptModel = MapEnv.model;
 		ArrayList<Literal> atLoc = new ArrayList<Literal>();
-		if(perceptModel != null){
+		if(perceptModel != null && agName != null){
 			//Initialise the Agent Variables
 			Flag  	 perceptFlag = perceptModel.flag;
 			int 	 id = perceptModel.getAgentID(agName);
@@ -51,9 +51,9 @@ public class Perception extends Environment implements InterfacePercept {
 		if(agName != null){
 			for(int y = -1; y <= 1; y++){
 				for(int x = -1; x <= 1; x++){
-					if(x != 0 && y != 0){
+					if(!(x == 0 && y == 0)){
 						Location l = new Location(lplayer.x + x, lplayer.y + y);
-		//				System.out.println("Player Loc: (" + lplayer.x + "," + lplayer.y + "):: See Loc (" + l.x + "," + l.y + ")");
+//						System.out.println("Player 1 Loc: (" + lplayer.x + "," + lplayer.y + "):: See Loc (" + l.x + "," + l.y + ")");
 						if(perceptModel.getAgAtPos(l) != -1){
 							int agt = perceptModel.getAgAtPos(l);
 							String plyr = perceptModel.getAgName(agt);
@@ -99,7 +99,7 @@ public class Perception extends Environment implements InterfacePercept {
 				teamList.add("red");
 			}
 		}
-		System.out.println("Teams Initialised");
+//		System.out.println("Teams Initialised");
 	}
 
 	public String getTeam(int id){

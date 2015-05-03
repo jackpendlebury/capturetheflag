@@ -20,10 +20,10 @@
 
 +!score : not have(flag) <- !get; .fail_goal(score).
 +!score : have(flag) & not at(player,base) <- !at(player,base); .fail_goal(score).
-+!score : have(flag) & at(player,base)
-<-	 score;
-	!get;
-	.succeed_goal(score).
++!score : have(flag) & at(player,base) 
+	<-	 score;
+		!get;
+		.succeed_goal(score).
 
 +!at(player,P) : at(player,flag) & not have(flag) <- !pickup; .fail_goal(at(player,P)).
 +!at(player,P) : at(player,base) & have(flag) <- !score; .fail_goal(at(player,P)).
@@ -34,9 +34,10 @@
      
 +!tackle : flagholder(X) <- tackle(X).
 
++at(player,base) : not have(flag) <- !get.
 +flagholder(X) <- !!tackle.
-+close(A) 		<- .send(A,tell,near(blue)).
-+near(red)[source(C)] : not C <- -near(red);
++close(A) 		<- .send(A,tell,near(red)).
++near(blue)[source(C)] : not C <- -near(blue);
 								 +C.
 						
 					  
