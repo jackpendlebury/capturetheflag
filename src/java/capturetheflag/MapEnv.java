@@ -12,24 +12,48 @@ public class MapEnv extends Environment {
 	public static MapView view;
 	public static InterfacePercept percept;
 	
+	/** Agent Command String Literals */
+	
 	public static final Literal sc = Literal.parseLiteral("score");
 	public static final Literal pu = Literal.parseLiteral("pickup");
+	
+	/** Jason Console Error Logger */
 
     private Logger logger = Logger.getLogger("capturetheflag."+MapEnv.class.getName());
     
+    /** Initial System Initialisation Function 
+     * 
+     * Parameter:
+     * String[] args - Argument from Initial Call from Jason Project File
+     * 
+     * */
+    
     @Override
     public void init(String[] args) {
+    	//Creates Model Class Instance
     	model = new MapModel();
+    	//Jason Project Call passes "gui" to initialise the GUI
     	if (args.length == 1 && args[0].equals("gui")) { 
+    		//Create GUI Class instance
             view  = new MapView(model);
             model.setView(view);
         }
+    	//Creates Perception Class Instance
     	percept = new Perception();
         super.init(args);
     }
     
+    /** Perception Update Function 
+     * 
+     * Parameter:
+     * String agName - Active Agent's Full Name
+     * 
+     * */
+    
     public void updatePercepts(String agName){
     	clearPercepts(agName);
+    	
+    	//Applies the Perceptions added to ArrayList within the Perception Class to the Active Agent
     	ArrayList<Literal> atLocation = percept.atLocation(agName);
     	if(!atLocation.isEmpty()){
     		for(int i=1; i <= atLocation.size(); i++){
@@ -45,11 +69,23 @@ public class MapEnv extends Environment {
     	}
     }
     
+    /** Execute Agent Action Function 
+     * 
+     * Parameter:
+     * String agName - Active Agent's Full Name
+     * Structure action - Data Structure containing Action calls
+     * 
+     * Returns:
+     * boolean - Boolean Success Indicator Flag
+     * 
+     * */
+    
     @SuppressWarnings("unused")
     public boolean executeAction(String agName, Structure action) {
     	int id = model.getAgentID(agName);
     	Location lplayer = model.getAgPos(id);
    		boolean result = false;
+   		//Call function to update Agent perceptions
     	updatePercepts(agName);
     	if (action.getFunctor().equals("move_towards")) {
             String l = action.getTerm(0).toString();
@@ -65,6 +101,7 @@ public class MapEnv extends Environment {
                 	dest = model.getAgPos(model.flag.agentCarrying);
                 }
             }
+            
             if(dest != null){
                 result = model.moveTo(id, dest.x, dest.y);
             } else {

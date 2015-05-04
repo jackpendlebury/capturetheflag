@@ -31,23 +31,23 @@ public class Model_Test {
 	public void testInitAgents() {
 		MapModel.GSize = 11;
 		MapModel.TotAgt = 12;
-		assertFalse("InitAgts catches TotAgt > GSize Error", testModel.initAgents());
+		assertFalse(testModel.initAgents());
 		
 		MapModel.GSize = 10;
 		MapModel.TotAgt = 0;
-		assertFalse("InitAgts catches TotAgt = 0 Error", testModel.initAgents());
+		assertFalse(testModel.initAgents());
 		
 		MapModel.GSize = 11;
 		MapModel.TotAgt = 2;
-		assertTrue("InitAgts functions with correct data", testModel.initAgents());
+		assertTrue(testModel.initAgents());
 	}
 
 	@Test
 	public void testRound() {
 		double i = 15;
 		assertEquals(7, MapModel.round(i/2));
-		i = 20;
-		assertEquals(6, MapModel.round(i/3));
+		i = 202;
+		assertEquals(67, MapModel.round(i/3));
 		i = 7;
 		assertEquals(3, MapModel.round(i/2));
 	}

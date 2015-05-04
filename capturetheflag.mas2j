@@ -1,9 +1,13 @@
 MAS capturetheflag {
 	
 	infrastructure: Centralised
+	
+	/** Environment Initialisation */
 
 	environment: capturetheflag.MapEnv(gui)
 
+	/** Initialise Agent's Active within System */
+	
 	agents:
 				
 		player1;

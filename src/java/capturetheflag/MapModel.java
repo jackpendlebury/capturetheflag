@@ -6,27 +6,29 @@ import jason.environment.grid.Location;
 
 public class MapModel extends GridWorldModel {
 		
-	//Constants for the Environment Objects
+	/** Constants for the Environment Objects */
 	public static final int RED_BASE = 32;
 	public static final int BLU_BASE = 16;
     public static final int FLAG 	 = 8;
 	
-	//Grid Size (Keep it odd, or it looks strange)
+	/** Grid Size (Keep it odd, or it looks strange) */
 	public static int GSize 	 = 15;
 	
-	//Number of Mobile Agents [MUST REMEMBER TO CHANGE]
+	/** Number of Mobile Agents [MUST REMEMBER TO CHANGE] */
 	public static int 		TotAgt   = 2;
 	
-	//Team Bases
+	/** Team Bases */
 	public static final Location rBase = new Location(round(GSize/2),round(GSize-1));
 	public static final Location bBase = new Location(round(GSize/2),0);
 	
-	//Environmental Variables
+	/** Environmental Variables */
 	InterfacePercept percept = new Perception();
-	public Flag 	 flag 	 = new Flag(round(MapModel.GSize/2), round(MapModel.GSize/2)); 		         
-	//Scores
+	public Flag 	 flag 	 = new Flag(round(MapModel.GSize/2), round(MapModel.GSize/2)); 	
+	
+	/** Game Scores */
 	public int rscore = 0; public int bscore = 0;
-		
+	
+	/** Model Constructor */
 	public MapModel() {
 		//Create the Grid
 		super(GSize, GSize, TotAgt);
@@ -40,6 +42,10 @@ public class MapModel extends GridWorldModel {
 		add(RED_BASE, rBase);
 		add(FLAG, flag.getFlagLoc());
 	}
+	
+	/** Map Initialisation Function
+	 * 
+	 *  NOTE: Incomplete due to failure to integrate pathfinding algorithm*/
 	
 	void initMap(int i){
 		switch(i){
@@ -58,6 +64,12 @@ public class MapModel extends GridWorldModel {
 				break;
 		}
 	}
+	
+	/** Agent Initialisation Method
+	 * 
+	 *  Returns:
+	 *  Boolean - Flag to indicate function success
+	 *  */
 	
 	public boolean initAgents() {
 		//Detects a player's team, then places them in an appropriate position.
@@ -78,20 +90,38 @@ public class MapModel extends GridWorldModel {
 			return false;
 		}
 	}
-
-	//TODO: Better Round function
+	
+	
+	/** Double -> Int Rounding Function 
+	 * 
+	 * Parameters: 
+	 * Double d - Double to be Rounded down to next whole Integer
+	 * 
+	 * Returns:
+	 * int - Rounded down double
+	 * */
 	public static int round(double d){
 		int x = (int) d;
 		return x;
 	}
 	
-	//Action Functions
+	/** Action Functions */
 	
-	//Agent Movement Action
+	/** Agent Movement Action Function 
+	 * 
+	 * Parameters: 
+	 * int id - Active Agent's ID
+	 * int dx - Destination X Co-Ordinate
+	 * int dy - Destination Y Co-Ordinate
+	 * 
+	 * Returns:
+	 * boolean - Function Success Indicator
+	 * 
+	 * */
 	boolean moveTo(int id, int dx, int dy){
 		Location lplayer = getAgPos(id);
 		Location dest = new Location(dx, dy);
-//		System.out.println("dest = " + dx + "," + dy);
+		//If the player is currently at the destination, do nothing.
 		if(lplayer == dest){
 			return false;
 		} else {
@@ -108,13 +138,14 @@ public class MapModel extends GridWorldModel {
 			} else if (p.y > dest.y){
 				p.y--;
 			}
+			//If the Location is unoccupied, move into it.
 			if(isFree(p)){
 				setAgPos(id, p.x, p.y);
 			}
 		}
-
+		
 		if (view != null) {
-			//Where the flag gets carried by the agent
+			//If the Flag is being carried it's location is the same as the Agent Carrying.
 			if(flag.flagCarried && id == flag.agentCarrying){
 				flag.setFlagLoc(lplayer);
 			}
@@ -122,6 +153,16 @@ public class MapModel extends GridWorldModel {
         }
         return true;
 	}
+	
+	/** Pick Up Flag Action Function 
+	 * 
+	 * Parameters: 
+	 * String agName - Active Agent's Full Name
+	 * 
+	 * Returns:
+	 * boolean - Function Success Indicator
+	 * 
+	 * */
 	
 	public boolean pickupFlag(String agName){
 		if(!flag.flagCarried){
@@ -135,6 +176,16 @@ public class MapModel extends GridWorldModel {
 		}
 	}
 	
+	/** Score Flag Action Function 
+	 * 
+	 * Parameters: 
+	 * String agName - Active Agent's Full Name
+	 * 
+	 * Returns:
+	 * boolean - Function Success Indicator
+	 * 
+	 * */
+	
 	public boolean scoreFlag(String agName){
 		if(flag.agentCarrying == getAgentID(agName)){
 			//Drop the Flag
@@ -145,6 +196,7 @@ public class MapModel extends GridWorldModel {
 			} else if(percept.getTeam(getAgentID(agName)) == "blue") {
 				bscore++;
 			}
+			//Reset the Flag Object Location
 			remove(FLAG, flag.getFlagLoc());
 			flag.setFlagLoc(flag.getRandomFlagLoc());
 			add(FLAG, flag.getFlagLoc());
@@ -155,6 +207,17 @@ public class MapModel extends GridWorldModel {
 			return false;
 		}
 	}
+	
+	/** Tackle Agent Action Function 
+	 * 
+	 * Parameters: 
+	 * String agName - Active Agent's Full Name
+	 * String tName - Target Agent's Full Name
+	 * 
+	 * Returns:
+	 * boolean - Function Success Indicator
+	 * 
+	 * */
 		
 	public boolean takeFlag(String agName, String tName){
 		int target = getAgentID(tName);
@@ -168,6 +231,16 @@ public class MapModel extends GridWorldModel {
 		}
 		return false;
 	}
+	
+	/** Function to Convert Agent Full Name to ID 
+	 * 
+	 * Parameters:
+	 * String agName - Agent's Full Name
+	 * 
+	 * Returns:
+	 * int - Relevant Agent's ID
+	 * 
+	 * */
 		
 	public int getAgentID(String agName){
 		//IMPORTANT: All Agent names must be the same length, with the integer in the same place.
@@ -177,6 +250,17 @@ public class MapModel extends GridWorldModel {
 		int i = Character.getNumericValue(l[6]); i -= 1;
 		return i;
 	}
+	
+	/** Function to Convert Agent ID to Full Name 
+	 * 
+	 * Parameters:
+	 * int - Relevant Agent's ID
+	 * String agName - Agent's Full Name
+	 * 
+	 * Returns:
+	 * String - Agent's Full Name
+	 * 
+	 * */
 	
 	public String getAgName(int id){
 		return "player" + (id+1);

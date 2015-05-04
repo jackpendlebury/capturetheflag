@@ -1,7 +1,5 @@
 // Agent player in project capturetheflag
 
-/* Initial beliefs */
-
 /* Initial goals */
 
 !get.

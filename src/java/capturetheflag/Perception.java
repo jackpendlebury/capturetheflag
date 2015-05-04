@@ -8,14 +8,27 @@ import jason.environment.grid.*;
 
 public class Perception extends Environment implements InterfacePercept {
 	
+	/** String Literals of possible Perceptions */
+	
 	private static final Literal af  = Literal.parseLiteral("at(player,flag)");
 	private static final Literal ab  = Literal.parseLiteral("at(player,base)");
 	private static final Literal ft  = Literal.parseLiteral("flag_taken");
 	private static final Literal hf  = Literal.parseLiteral("have(flag)");
+	
+	/**	ArrayList containing the Team Allocations */
 		
-	public static ArrayList<String>  teamList = new ArrayList<String>();
+	public static ArrayList<String> teamList = new ArrayList<String>();
 	static MapModel perceptModel;
 	
+	/**
+	 * Agent Current Location Perceptions Method
+	 * 
+	 * Parameters: 
+	 * agName(String) - Active Agent's full name
+	 * 
+	 * Returns:
+	 * ArrayList<Literal> - ArrayList of all Perceptions to be added by the Current Location.
+	 */
 	
 	public ArrayList<Literal> atLocation(String agName){
 		perceptModel = MapEnv.model;
@@ -26,7 +39,7 @@ public class Perception extends Environment implements InterfacePercept {
 			int 	 id = perceptModel.getAgentID(agName);
 			Location lplayer = perceptModel.getAgPos(id); 
 
-			//Return the Literals for adding the Perceptions
+			//Call the Literals for adding the Perceptions
 			if(perceptModel.flag.agentCarrying == id){
 				atLoc.add(hf);
 			}
@@ -41,7 +54,15 @@ public class Perception extends Environment implements InterfacePercept {
 		} return null;
 	}
 	
-	//TODO: LookAround still not working
+	/**
+	 * Agent Nearby Perceptions Method
+	 * 
+	 * Parameters: 
+	 * agName(String) - Active Agent's full name
+	 * 
+	 * Returns:
+	 * ArrayList<Literal> - ArrayList of all Perceptions to be added by nearby Agent's and Objects.
+	 */
 	
 	public ArrayList<Literal> lookAround(String agName){
 		perceptModel = MapEnv.model;
@@ -49,6 +70,7 @@ public class Perception extends Environment implements InterfacePercept {
 		int 	 id 	 	  = perceptModel.getAgentID(agName);
 		Location lplayer 	  = perceptModel.getAgPos(id); 
 		if(agName != null){
+			/** Searching direct neighbours to the Agent's location*/
 			for(int y = -1; y <= 1; y++){
 				for(int x = -1; x <= 1; x++){
 					if(!(x == 0 && y == 0)){
@@ -57,6 +79,7 @@ public class Perception extends Environment implements InterfacePercept {
 						if(perceptModel.getAgAtPos(l) != -1){
 							int agt = perceptModel.getAgAtPos(l);
 							String plyr = perceptModel.getAgName(agt);
+							/** Detects and adds nearby agents flagholder status perception */
 							if(perceptModel.flag.agentCarrying == perceptModel.getAgentID(plyr)){
 								Literal nfh = Literal.parseLiteral("flagholder(" + plyr + ")");
 								lookArr.add(nfh);
@@ -68,6 +91,7 @@ public class Perception extends Environment implements InterfacePercept {
 					}
 				}
 			}
+			/** Searching an single space further in the cardinal directions*/
 			for(int y = -2; y <= 2; y+=4){
 				for(int x = -2; x <= 2; x+=4){
 					Location l = new Location(lplayer.x + x, lplayer.y + y);
@@ -75,6 +99,7 @@ public class Perception extends Environment implements InterfacePercept {
 					if(perceptModel.getAgAtPos(l) != -1 ){
 						int 	agt = perceptModel.getAgAtPos(l);
 						String plyr = perceptModel.getAgName(agt);
+						/** Detects and adds nearby agents flagholder status perception */
 						if(perceptModel.flag.agentCarrying == perceptModel.getAgentID(plyr)){
 							Literal nfh = Literal.parseLiteral("flagholder(" + plyr + ")");
 							lookArr.add(nfh);
@@ -85,9 +110,12 @@ public class Perception extends Environment implements InterfacePercept {
 					}
 				}
 			}
+			/** Returns completed ArrayList */ 
 			return lookArr;
 		} else return null;
 	}
+	
+	/** Team Initialisation Function */
 	
 	public static void initTeams(){
 		for(int i = 0; i <= MapModel.TotAgt; i++){
@@ -99,15 +127,19 @@ public class Perception extends Environment implements InterfacePercept {
 				teamList.add("red");
 			}
 		}
-//		System.out.println("Teams Initialised");
+		System.out.println("Teams Initialised");
 	}
+	
+	/** Team Allegiance reference function */
 
 	public String getTeam(int id){
 		return teamList.get(id);
 	}
 	
+	/** Team Base Location reference function */
+	
 	public Location getTeamBase(int id){
-		//Returns the Agents base, or their own location if something goes wrong
+		//Returns the Agents base
 		if(teamList.get(id) == "red"){
 			return MapModel.rBase;
 		} else if(teamList.get(id) == "blue") {
